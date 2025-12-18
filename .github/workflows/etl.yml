@@ -1,0 +1,114 @@
+name: ETL Data Processing Pipeline
+
+# Trigger this workflow via repository_dispatch event
+on:
+  repository_dispatch:
+    types: [run-etl]
+
+# Environment variables for the workflow
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  etl-job:
+    name: Extract, Transform, Load Data
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for proper versioning
+          fetch-depth: 0
+
+      # Step 2: Setup Node.js environment
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      # Step 3: Install dependencies for both backend and ETL scripts
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci --only=production
+          
+      # Step 4: Install ETL script dependencies
+      - name: Install ETL Dependencies
+        run: |
+          cd scripts/etl
+          npm ci --only=production
+
+      # Step 5: Run ETL script with environment variables
+      - name: Execute ETL Process
+        run: |
+          cd scripts/etl
+          node etl.js
+        env:
+          # MongoDB connection (use GitHub Secrets for production)
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          
+          # ETL configuration
+          ETL_OUTPUT_PATH: './output'
+          ETL_BACKUP_COUNT: 5
+          
+          # GitHub context information
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+          
+          # Trigger context from repository_dispatch
+          TRIGGER_ACTOR: ${{ github.event.client_payload.triggered_by }}
+          TRIGGER_TIMESTAMP: ${{ github.event.client_payload.timestamp }}
+          REQUEST_ID: ${{ github.event.client_payload.request_id }}
+
+      # Step 6: Archive ETL outputs as artifacts
+      - name: Upload ETL Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: etl-output-${{ github.run_number }}
+          path: |
+            scripts/etl/output/
+            scripts/etl/logs/
+          retention-days: 30
+
+      # Step 7: Create a summary report
+      - name: Generate ETL Summary
+        run: |
+          echo "## ETL Pipeline Execution Summary 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Details:**" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎯 Triggered by: ${{ github.event.client_payload.triggered_by }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ⏰ Timestamp: ${{ github.event.client_payload.timestamp }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 Request ID: ${{ github.event.client_payload.request_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏃 Runner: ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Node Version: ${{ env.NODE_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if ETL output exists and show status
+          if [ -f "scripts/etl/output/latest.json" ]; then
+            echo "✅ **ETL Status:** SUCCESS" >> $GITHUB_STEP_SUMMARY
+            echo "📄 Output files generated successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **ETL Status:** FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ No output files were generated" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Check artifacts for detailed output files" >> $GITHUB_STEP_SUMMARY
+          echo "- Review logs for any warnings or errors" >> $GITHUB_STEP_SUMMARY
+          echo "- Application can now consume the updated dataset" >> $GITHUB_STEP_SUMMARY
+
+      # Step 8: Notify on failure (optional webhook or email)
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ ETL pipeline failed!"
+          echo "Check the logs above for detailed error information."
+          echo "Request ID: ${{ github.event.client_payload.request_id }}"
+          # Add webhook notification here if needed
+          # curl -X POST "your-webhook-url" -d '{"status": "failed", "request_id": "${{ github.event.client_payload.request_id }}"}'

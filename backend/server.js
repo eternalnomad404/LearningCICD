@@ -26,6 +26,7 @@ connectDB();
 
 // Routes
 app.use('/api/tasks', require('./routes/taskRoutes'));
+app.use('/api/etl', require('./routes/etlRoutes'));
 
 // Test route
 app.get('/', (req, res) => {

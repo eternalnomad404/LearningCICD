@@ -1,0 +1,17 @@
+{
+  "name": "etl-script",
+  "version": "1.0.0",
+  "description": "ETL script for processing todo list data",
+  "main": "etl.js",
+  "scripts": {
+    "start": "node etl.js",
+    "dev": "nodemon etl.js"
+  },
+  "dependencies": {
+    "mongoose": "^8.0.3",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

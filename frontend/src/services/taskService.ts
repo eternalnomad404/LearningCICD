@@ -82,6 +82,20 @@ class TaskService {
   async toggleTaskCompletion(id: string, completed: boolean): Promise<Task> {
     return this.updateTask(id, { completed });
   }
+
+  // Trigger ETL workflow
+  async triggerETL(adminToken: string): Promise<{ success: boolean; message: string; data?: any }> {
+    try {
+      const response = await api.post('/etl/trigger-etl', {}, {
+        headers: {
+          'x-admin-token': adminToken
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to trigger ETL workflow');
+    }
+  }
 }
 
 export default new TaskService();

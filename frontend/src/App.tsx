@@ -13,6 +13,11 @@ const App: React.FC = () => {
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+  
+  // Admin ETL state
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminToken, setAdminToken] = useState('');
+  const [isETLLoading, setIsETLLoading] = useState(false);
 
   // Fetch tasks on component mount
   useEffect(() => {
@@ -106,6 +111,30 @@ const App: React.FC = () => {
     }
   };
 
+  // ETL Trigger Function
+  const handleTriggerETL = async () => {
+    if (!adminToken.trim()) {
+      showNotification('Please enter admin token', 'error');
+      return;
+    }
+
+    try {
+      setIsETLLoading(true);
+      const result = await taskService.triggerETL(adminToken);
+      
+      if (result.success) {
+        showNotification('ETL workflow triggered successfully!', 'success');
+        console.log('ETL triggered:', result.data);
+      } else {
+        showNotification(result.message || 'Failed to trigger ETL', 'error');
+      }
+    } catch (err: any) {
+      showNotification(err.message || 'Failed to trigger ETL workflow', 'error');
+    } finally {
+      setIsETLLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -192,6 +221,69 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Admin Panel */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowAdminPanel(!showAdminPanel)}
+            className="mb-4 px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors duration-200"
+          >
+            {showAdminPanel ? '🔧 Hide Admin Panel' : '🔧 Show Admin Panel'}
+          </button>
+          
+          {showAdminPanel && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm">
+              <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                📊 Data Synchronization
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="admin-token" className="block text-sm font-medium text-blue-700 mb-1">
+                    Admin Token
+                  </label>
+                  <input
+                    id="admin-token"
+                    type="password"
+                    value={adminToken}
+                    onChange={(e) => setAdminToken(e.target.value)}
+                    placeholder="Enter admin token"
+                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isETLLoading}
+                  />
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleTriggerETL}
+                    disabled={isETLLoading || !adminToken.trim()}
+                    className={`px-4 py-2 rounded-md font-medium transition-all duration-200 ${
+                      isETLLoading || !adminToken.trim()
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    {isETLLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Triggering...</span>
+                      </div>
+                    ) : (
+                      '🚀 Sync Data'
+                    )}
+                  </button>
+                  
+                  {isETLLoading && (
+                    <p className="text-sm text-blue-600">
+                      Starting ETL workflow in GitHub Actions...
+                    </p>
+                  )}
+                </div>
+                <p className="text-xs text-blue-600">
+                  This will trigger a GitHub Actions workflow to process and synchronize the task data.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Task Form */}
         <TaskForm
