@@ -28,6 +28,17 @@ const adminAuth = (req, res, next) => {
 // POST /api/trigger-etl - Triggers GitHub Actions ETL workflow
 router.post('/trigger-etl', adminAuth, async (req, res) => {
   try {
+    // 🔍 COMPREHENSIVE DEBUG LOGGING
+    console.log('=== ETL TRIGGER DEBUG INFO ===');
+    console.log('Current working directory:', process.cwd());
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('ALL GitHub related env vars:');
+    console.log('- GITHUB_TOKEN exists:', !!process.env.GITHUB_TOKEN);
+    console.log('- GITHUB_TOKEN prefix:', process.env.GITHUB_TOKEN ? process.env.GITHUB_TOKEN.slice(0, 8) + '...' : 'UNDEFINED');
+    console.log('- GITHUB_REPO:', process.env.GITHUB_REPO);
+    console.log('- Expected token prefix: ghp_q9Xs...');
+    console.log('================================');
+    
     // Validate required environment variables
     const githubToken = process.env.GITHUB_TOKEN;
     const githubRepo = process.env.GITHUB_REPO; // format: "owner/repo"
@@ -62,15 +73,26 @@ router.post('/trigger-etl', adminAuth, async (req, res) => {
     console.log(`GitHub API URL: ${githubApiUrl}`);
 
     // Call GitHub repository dispatch API
-    const githubResponse = await axios.post(githubApiUrl, payload, {
-      headers: {
-        'Authorization': `Bearer ${githubToken}`,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-        'X-GitHub-Api-Version': '2022-11-28'
-      },
-      timeout: 10000 // 10 second timeout
-    });
+    // 🔴 DEBUG: confirm which token is actually being used
+console.log(
+  "GitHub token prefix:",
+  githubToken ? githubToken.slice(0, 4) : "undefined"
+);
+
+const githubResponse = await axios.post(
+  githubApiUrl,
+  payload,
+  {
+    headers: {
+      Authorization: `Bearer ${githubToken}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+      "X-GitHub-Api-Version": "2022-11-28"
+    },
+    timeout: 10000 // 10 second timeout
+  }
+);
+
 
     if (githubResponse.status === 204) {
       console.log(`ETL workflow triggered successfully at ${new Date().toISOString()}`);

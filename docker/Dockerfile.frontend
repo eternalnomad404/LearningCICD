@@ -1,0 +1,70 @@
+# ==============================================================================
+# FRONTEND DOCKERFILE - Production-Ready React Application
+# ==============================================================================
+
+# ==============================================================================
+# BUILD STAGE - Build the React application
+# ==============================================================================
+FROM node:18-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install all dependencies (including devDependencies for build)
+# Use install instead of ci to handle lock file mismatches
+RUN npm install
+
+# Copy source code
+COPY frontend/ ./
+
+# Build the React application for production
+RUN npm run build
+
+# ==============================================================================
+# PRODUCTION STAGE - Serve with nginx
+# ==============================================================================
+FROM nginx:alpine AS runtime
+
+# Install envsubst for environment variable substitution
+RUN apk add --no-cache gettext
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S frontend && \
+    adduser -S frontend -u 1001 -G frontend
+
+# Remove default nginx configuration
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy custom nginx configuration template
+COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# Copy built React application from builder stage
+COPY --from=builder --chown=frontend:frontend /app/build /usr/share/nginx/html
+
+# Create runtime script for environment variable injection
+COPY docker/entrypoint.sh /docker-entrypoint.d/40-inject-env.sh
+RUN chmod +x /docker-entrypoint.d/40-inject-env.sh
+
+# Set proper permissions
+RUN chown -R frontend:frontend /usr/share/nginx/html && \
+    chown -R frontend:frontend /var/cache/nginx && \
+    chown -R frontend:frontend /var/log/nginx && \
+    chown -R frontend:frontend /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R frontend:frontend /var/run/nginx.pid
+
+# Switch to non-root user
+USER frontend
+
+# Health check to ensure nginx is serving content
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
+# Expose port 3000 (standard React development port, configurable)
+EXPOSE 3000
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

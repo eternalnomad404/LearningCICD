@@ -1,0 +1,106 @@
+# ==============================================================================
+# Docker Compose Configuration for MERN Todo Application
+# ==============================================================================
+# This file orchestrates the frontend and backend services for both
+# development and production environments
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # BACKEND SERVICE - Node.js/Express API
+  # =============================================================================
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: todo-backend
+    restart: unless-stopped
+    
+    # Environment variables (override in .env file or deployment)
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${BACKEND_PORT:-5000}
+      - MONGODB_URI=${MONGODB_URI}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO}
+    
+    # Port mapping (host:container)
+    ports:
+      - "${BACKEND_PORT:-5000}:${BACKEND_PORT:-5000}"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${BACKEND_PORT:-5000}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - todo-network
+
+  # =============================================================================
+  # FRONTEND SERVICE - React Application (nginx)
+  # =============================================================================
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: todo-frontend
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:5000}
+      - BACKEND_URL=http://backend:5000
+    
+    # Port mapping
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    
+    # Depends on backend service
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - todo-network
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  todo-network:
+    driver: bridge
+    name: todo-network
+
+# =============================================================================
+# VOLUMES (for future use - databases, persistent storage)
+# =============================================================================
+volumes:
+  # Placeholder for future persistent storage needs
+  app-data:

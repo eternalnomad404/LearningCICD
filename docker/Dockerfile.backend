@@ -1,0 +1,58 @@
+# ==============================================================================
+# BACKEND DOCKERFILE - Production-Ready Node.js API
+# ==============================================================================
+
+# Use official Node.js LTS (Long Term Support) runtime as base image
+FROM node:18-alpine AS base
+
+# Set working directory inside container
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S backend -u 1001 -G nodejs
+
+# ==============================================================================
+# DEPENDENCY STAGE - Install dependencies
+# ==============================================================================
+FROM base AS deps
+
+# Copy package files
+COPY backend/package*.json ./
+
+# Install dependencies (production only for security and size)
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# ==============================================================================
+# PRODUCTION STAGE - Final runtime image
+# ==============================================================================
+FROM base AS runtime
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy dependencies from deps stage
+COPY --from=deps --chown=backend:nodejs /app/node_modules ./node_modules
+
+# Copy application source code
+COPY --chown=backend:nodejs backend/ ./
+
+# Create logs directory
+RUN mkdir -p logs && chown backend:nodejs logs
+
+# Switch to non-root user
+USER backend
+
+# Health check to ensure container is running properly
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 5000) + '/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Expose the port the app runs on
+EXPOSE 5000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "server.js"]

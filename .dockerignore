@@ -1,0 +1,76 @@
+# ==============================================================================
+# DOCKER IGNORE - Exclude unnecessary files from Docker build context
+# ==============================================================================
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (use runtime injection instead)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+build
+dist
+out
+
+# Development files
+*.log
+logs
+coverage
+.nyc_output
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker files (to avoid recursive copying)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Documentation (optional - comment out if you want docs in container)
+README.md
+docs/
+*.md
+
+# Scripts (optional)
+scripts/
+.github/
+
+# Testing
+tests/
+test/
+spec/
+__tests__
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Lock files (we use package-lock.json in Dockerfile)
+yarn.lock
+
+# Other
+.sass-cache/
+.eslintcache

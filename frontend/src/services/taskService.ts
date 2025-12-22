@@ -1,6 +1,22 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Get API URL from environment variables or runtime config
+const getApiUrl = () => {
+  // Check for runtime environment config (injected by Docker)
+  if (typeof window !== 'undefined' && (window as any)._env_?.REACT_APP_API_URL) {
+    return (window as any)._env_.REACT_APP_API_URL;
+  }
+  
+  // Fall back to build-time environment variable
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Default for development
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiUrl() + '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
