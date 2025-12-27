@@ -28,6 +28,10 @@ coverage/
 # nyc test coverage
 .nyc_output
 
+# MongoDB Memory Server (test database cache)
+.mongodb-memory-server/
+globalConfig.json
+
 # Build directory
 build/
 dist/
