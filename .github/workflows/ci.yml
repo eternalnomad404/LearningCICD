@@ -152,7 +152,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/todo-backend
+          images: ${{ secrets.DOCKER_USERNAME }}/todo-backend2
           tags: |
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
@@ -177,7 +177,7 @@ jobs:
       - name: Image Build Summary
         run: |
           echo "### Docker Image Built & Pushed 🐳" >> $GITHUB_STEP_SUMMARY
-          echo "- Repository: ${{ secrets.DOCKER_USERNAME }}/todo-backend" >> $GITHUB_STEP_SUMMARY
+          echo "- Repository: ${{ secrets.DOCKER_USERNAME }}/todo-backend2" >> $GITHUB_STEP_SUMMARY
           echo "- Tags: ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo "- Render will pull this image automatically" >> $GITHUB_STEP_SUMMARY
 
