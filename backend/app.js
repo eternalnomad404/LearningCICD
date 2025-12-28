@@ -16,12 +16,12 @@ app.use('/api/etl', require('./routes/etlRoutes'));
 // Test route
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Todo List API - DEMO VERSION',
-    version: '3.0.0',
+    message: 'Todo List API - DEMO v3.1 - Webhook Active!',
+    version: '3.1.0',
     pipeline: 'FULL AUTO-DEPLOY: GitHub Actions → Docker Hub → Render',
     status: 'All systems operational',
     timestamp: new Date().toISOString(),
-    deployment: 'Automated via webhooks'
+    deployment: 'Automated via webhooks - LIVE NOW!'
   });
 });
 
