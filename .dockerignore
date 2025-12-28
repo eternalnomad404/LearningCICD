@@ -57,11 +57,19 @@ docs/
 scripts/
 .github/
 
-# Testing
+# Testing (exclude test files and coverage from production builds)
 tests/
 test/
 spec/
-__tests__
+__tests__/
+coverage/
+jest.config.js
+*.test.js
+*.spec.js
+
+# MongoDB Memory Server (test database artifacts)
+.mongodb-memory-server/
+globalConfig.json
 
 # Temporary files
 tmp/
