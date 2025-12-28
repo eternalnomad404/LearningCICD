@@ -137,18 +137,18 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* CI/CD Deployment Banner - UPDATED! */}
-      <div className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 text-white animate-gradient">
+      {/* CI/CD Deployment Banner - DEMO VERSION 3.0 */}
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-center space-x-3 text-sm font-semibold">
-            <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <div className="flex items-center justify-center space-x-3 text-base font-bold">
+            <svg className="w-7 h-7 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
             </svg>
-            <span className="tracking-wide">
-              ✨ LIVE CI/CD PIPELINE ✨ | GitHub Actions → Tests (18) → Docker Build → Push to Hub → Deploy!
+            <span className="tracking-wider uppercase">
+              🎯 DEMO v3.0 - FULL CI/CD AUTO-DEPLOY | GitHub → Docker Hub → Render → Netlify! 🚀
             </span>
-            <svg className="w-6 h-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            <svg className="w-7 h-7 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
             </svg>
           </div>
         </div>
