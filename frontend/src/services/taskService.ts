@@ -114,4 +114,5 @@ class TaskService {
   }
 }
 
-export default new TaskService();
+const taskServiceInstance = new TaskService();
+export default taskServiceInstance;

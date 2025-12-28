@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
 import taskService, { Task } from './services/taskService';
@@ -19,26 +19,11 @@ const App: React.FC = () => {
   const [adminToken, setAdminToken] = useState('');
   const [isETLLoading, setIsETLLoading] = useState(false);
 
-  // Fetch tasks on component mount
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  // Auto-hide notifications after 3 seconds
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
-
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({ message, type });
   };
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -50,7 +35,22 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch tasks on component mount
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // Auto-hide notifications after 3 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleCreateTask = async (taskData: Omit<Task, '_id' | 'createdAt' | 'updatedAt'>) => {
     try {
