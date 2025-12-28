@@ -2,7 +2,7 @@
 
 ## What You Have
 
-✅ **Jest** - Test framework  
+✅ **Jest** - Test framework,  
 ✅ **Supertest** - HTTP request testing without starting a server  
 ✅ **MongoDB Memory Server** - In-memory database that doesn't touch production  
 ✅ **18 practical tests** - Real-world scenarios, not toy examples  

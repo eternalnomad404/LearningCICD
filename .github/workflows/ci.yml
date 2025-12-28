@@ -20,12 +20,8 @@ name: CI/CD
 on:
   push:
     branches: [ main ]
-    # Removed paths filter - now runs on ANY push to main
   pull_request:
     branches: [ main ]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/ci.yml'
 
 # Ensure only one CI run per PR/branch at a time
 concurrency:
