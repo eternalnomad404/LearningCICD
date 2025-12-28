@@ -20,11 +20,18 @@ app.get('/', (req, res) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
+  const healthcheck = {
     success: true,
     message: 'Server is healthy',
-    timestamp: new Date().toISOString()
-  });
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  };
+
+  const httpCode = mongoose.connection.readyState === 1 ? 200 : 503;
+  
+  res.status(httpCode).json(healthcheck);
 });
 
 // Error handling middleware

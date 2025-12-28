@@ -1,0 +1,143 @@
+# ==============================================================================
+# CI WORKFLOW - Continuous Integration
+# ==============================================================================
+# PURPOSE:
+#   - Run tests on every push and pull request to main
+#   - Ensure code quality before merge
+#   - Block broken code from reaching production
+#
+# DOES NOT:
+#   - Deploy code (that's Render's job)
+#   - Build Docker images (Render does this)
+#   - Modify any infrastructure
+# ==============================================================================
+
+name: CI
+
+# Trigger conditions
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'           # Only run if backend code changes
+      - '.github/workflows/ci.yml'  # Or if this workflow changes
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci.yml'
+
+# Ensure only one CI run per PR/branch at a time
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    # Explicit timeout to prevent hung jobs
+    timeout-minutes: 10
+    
+    # Service containers for dependencies
+    services:
+      # MongoDB for integration tests
+      mongodb:
+        image: mongo:7
+        env:
+          MONGO_INITDB_DATABASE: testdb
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # ----------------------------------------------------------------------
+      # 1. CHECKOUT CODE
+      # ----------------------------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------------
+      # 2. SETUP NODE.JS
+      # ----------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'          # Match your Dockerfile version
+          cache: 'npm'                # Cache npm dependencies
+          cache-dependency-path: backend/package-lock.json
+
+      # ----------------------------------------------------------------------
+      # 3. INSTALL DEPENDENCIES
+      # ----------------------------------------------------------------------
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci                   # ci = clean install (deterministic)
+
+      # ----------------------------------------------------------------------
+      # 4. RUN TESTS
+      # ----------------------------------------------------------------------
+      - name: Run tests
+        working-directory: ./backend
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/testdb
+          PORT: 5000
+        run: npm test -- --ci --coverage --maxWorkers=2
+
+      # ----------------------------------------------------------------------
+      # 5. UPLOAD COVERAGE (Optional but professional)
+      # ----------------------------------------------------------------------
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()                  # Upload even if tests fail
+        with:
+          name: coverage-report
+          path: backend/coverage/
+          retention-days: 30
+
+      # ----------------------------------------------------------------------
+      # 6. REPORT TEST RESULTS
+      # ----------------------------------------------------------------------
+      - name: Test Report Summary
+        if: always()
+        run: |
+          echo "### Test Results 📊" >> $GITHUB_STEP_SUMMARY
+          echo "- Node Version: 18" >> $GITHUB_STEP_SUMMARY
+          echo "- Test Command: npm test -- --ci --coverage" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Lint check (recommended for production)
+  # lint:
+  #   name: Lint Code
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #         cache: 'npm'
+  #         cache-dependency-path: backend/package-lock.json
+  #     - run: npm ci
+  #       working-directory: ./backend
+  #     - run: npm run lint
+  #       working-directory: ./backend
+
+# ==============================================================================
+# FAILURE MODES:
+# 
+# - If tests fail → job exits with code 1 → PR shows red ❌
+# - If dependencies can't install → job fails fast
+# - If MongoDB service doesn't start → health check fails → job fails
+# - If timeout exceeds 10 minutes → job is cancelled
+# 
+# WHERE TO CHECK LOGS:
+# - GitHub Actions tab in your repo
+# - Each step has collapsible logs
+# - Failed steps are highlighted in red
+# ==============================================================================

@@ -1,0 +1,68 @@
+# ==============================================================================
+# RENDER.YAML - Render Platform Configuration
+# ==============================================================================
+# PURPOSE:
+#   - Defines how Render should deploy your backend
+#   - Specifies environment, build commands, and health checks
+#   - Infrastructure as Code (version controlled)
+#
+# DOCUMENTATION:
+#   https://render.com/docs/blueprint-spec
+# ==============================================================================
+
+services:
+  # Backend API Service
+  - type: web
+    name: todo-backend
+    env: node
+    region: oregon              # Choose: oregon, frankfurt, singapore, ohio
+    plan: free                  # Change to 'starter' for production
+    
+    # Repository settings
+    branch: main                # Deploy from main branch only
+    
+    # Build settings
+    rootDir: backend            # Where the backend code lives
+    buildCommand: npm ci        # Install production dependencies only
+    startCommand: npm start     # Start the server (node server.js)
+    
+    # Runtime settings
+    healthCheckPath: /api/health
+    numInstances: 1             # Increase for high availability
+    
+    # Auto-deploy settings
+    autoDeploy: true            # Deploy automatically when main branch updates
+    
+    # Environment variables (add more in Render dashboard)
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000           # Render will override this dynamically
+      - key: MONGODB_URI
+        sync: false           # Must be set manually in Render dashboard (secret)
+
+# ==============================================================================
+# DEPLOYMENT PROCESS:
+# 
+# 1. You push to GitHub main branch
+# 2. GitHub Actions runs tests (CI)
+# 3. If tests pass → code is available on main
+# 4. Render detects changes on main branch
+# 5. Render builds using: npm ci
+# 6. Render starts using: npm start
+# 7. Render checks /api/health endpoint
+# 8. If healthy → deployment succeeds
+# 9. Traffic switches to new deployment
+# 
+# FAILURE MODES:
+# 
+# - If build fails → deployment aborted, old version keeps running
+# - If health check fails → deployment aborted, old version keeps running
+# - If app crashes → Render auto-restarts (up to retry limits)
+# 
+# WHERE TO CHECK LOGS:
+# - Render Dashboard → Your Service → Logs tab
+# - Build logs show npm ci output
+# - Runtime logs show console.log output
+# ==============================================================================

@@ -1,0 +1,63 @@
+# ==============================================================================
+# DOCKERIGNORE - Exclude unnecessary files from Docker builds
+# ==============================================================================
+# Reduces image size and build time
+# Improves security by not copying sensitive files
+# ==============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Documentation
+*.md
+docs/
+
+# Tests
+__tests__
+*.test.js
+*.spec.js
+coverage/
+.nyc_output
+
+# Development dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (CRITICAL - never copy to image)
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Build artifacts
+dist
+build
+
+# MongoDB Memory Server (test database)
+.mongodb-memory-server
+globalConfig.json
+
+# Temporary files
+tmp/
+temp/

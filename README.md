@@ -1,6 +1,8 @@
-# MERN Stack Todo List Application
+# 📝 MERN Stack Todo List Application
 
-A complete full-stack Todo List web application built with the MERN stack (MongoDB, Express.js, React, Node.js) and styled with Tailwind CSS.
+A production-ready full-stack Todo List application with automated CI/CD pipeline, built with the MERN stack (MongoDB, Express.js, React, Node.js) and styled with Tailwind CSS.
+
+[![CI](https://github.com/YOUR-USERNAME/to-do-list/workflows/CI/badge.svg)](https://github.com/YOUR-USERNAME/to-do-list/actions)
 
 ## 🚀 Features
 
@@ -161,28 +163,58 @@ The backend exposes the following REST API endpoints:
 }
 ```
 
-## 🧪 Testing the API
+## 🧪 Testing
 
-You can test the API endpoints using **Postman** or any other API testing tool:
+### Backend Tests
+```bash
+cd backend
+npm test                 # Run all tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # With coverage report
+```
 
-### Examples:
+### API Testing
+Test endpoints using **Postman** or **curl**:
 
-1. **Create a Task** (POST `/api/tasks`):
-   ```json
-   {
-     "title": "Learn React",
-     "description": "Complete React tutorial",
-     "priority": "High",
-     "dueDate": "2024-01-20"
-   }
-   ```
+```bash
+# Health check
+curl http://localhost:5000/api/health
 
-2. **Update a Task** (PUT `/api/tasks/:id`):
-   ```json
-   {
-     "completed": true
-   }
-   ```
+# Create a task
+curl -X POST http://localhost:5000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Learn React","priority":"High"}'
+
+# Get all tasks
+curl http://localhost:5000/api/tasks
+```
+
+## 🚀 CI/CD Pipeline
+
+This project includes a production-grade CI/CD pipeline:
+
+- **CI (GitHub Actions)**: Automated testing on every push/PR
+- **CD (Render)**: Automatic deployment when tests pass
+
+📖 **Full CI/CD Documentation**: See [CICD.md](CICD.md)
+
+## 🌐 Deployment
+
+### Quick Deploy to Render
+
+1. **Push code to GitHub**
+2. **Tests run automatically** (GitHub Actions)
+3. **Deploy to Render** (if tests pass)
+
+📖 **Step-by-step guide**: See [CICD.md](CICD.md)
+
+### Environment Variables (Production)
+
+```bash
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/todolist
+PORT=5000  # Auto-set by Render
+```
 
 ## 🎨 UI Features
 
@@ -191,12 +223,11 @@ You can test the API endpoints using **Postman** or any other API testing tool:
 - Form validation with error messages
 - Priority selection (Low, Medium, High)
 - Optional due date picker
-- Character limits for title and description
 
 ### Task List
 - Search functionality
 - Filter by status (All, Active, Completed)
-- Sort by multiple criteria (Newest, Oldest, Priority, Due Date)
+- Sort by multiple criteria
 - Task statistics dashboard
 - Responsive grid layout
 
@@ -205,68 +236,49 @@ You can test the API endpoints using **Postman** or any other API testing tool:
 - Priority indicators with color coding
 - Due date display with overdue warnings
 - Edit and delete actions
-- Confirmation dialogs for destructive actions
-
-## 🔧 Development
-
-### Available Scripts
-
-#### Backend
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-
-#### Frontend
-- `npm start` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
-
-### Environment Variables
-
-The backend uses the following environment variables (already configured):
-- `MONGODB_URI` - MongoDB connection string
-- `PORT` - Server port (default: 5000)
-
-## 🚀 Deployment
-
-### Backend Deployment
-1. Set environment variables on your hosting platform
-2. Install dependencies: `npm install`
-3. Start the server: `npm start`
-
-### Frontend Deployment
-1. Build the project: `npm run build`
-2. Serve the `build` folder using a static file server
-
-## 🤝 Frontend-Backend Connection
-
-The frontend connects to the backend through:
-1. **Proxy Configuration**: `package.json` includes `"proxy": "http://localhost:5000"`
-2. **Axios Service**: Centralized API service in `taskService.ts`
-3. **Error Handling**: Comprehensive error handling with user notifications
-4. **State Management**: React hooks for state management
 
 ## 📱 Responsive Design
 
-The application is fully responsive and works on:
+Fully responsive and works on:
 - **Desktop** (1024px+)
 - **Tablet** (768px - 1024px)
 - **Mobile** (320px - 768px)
 
-## 🎯 Key Learning Points
+## 🔧 Development Scripts
 
-This project demonstrates:
-- Full-stack development with MERN stack
-- RESTful API design and implementation
-- MongoDB database operations with Mongoose
-- Modern React development with TypeScript
-- Tailwind CSS for rapid UI development
-- Error handling and user experience
-- Form validation and state management
-- Responsive web design principles
+### Backend
+```bash
+npm start       # Production server
+npm run dev     # Development with nodemon
+npm test        # Run tests
+```
+
+### Frontend
+```bash
+npm start       # Development server
+npm run build   # Production build
+npm test        # Run tests
+```
+
+## 🎯 Key Features Demonstrated
+
+- Full-stack MERN development
+- RESTful API design
+- MongoDB with Mongoose ODM
+- Modern React with TypeScript
+- Tailwind CSS styling
+- Automated testing with Jest
+- CI/CD with GitHub Actions & Render
+- Production-grade error handling
+- Environment-based configuration
+
+## 📚 Documentation
+
+- **[CICD.md](CICD.md)** - Complete CI/CD pipeline documentation
 
 ## 📝 License
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT License - Open source and free to use.
 
 ---
 
