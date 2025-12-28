@@ -1,30 +1,33 @@
 # ==============================================================================
-# RENDER.YAML - Render Platform Configuration
+# RENDER.YAML - Render Platform Configuration (Docker-based)
 # ==============================================================================
 # PURPOSE:
-#   - Defines how Render should deploy your backend
-#   - Specifies environment, build commands, and health checks
-#   - Infrastructure as Code (version controlled)
+#   - Render builds Docker image from your repository
+#   - Uses the same Dockerfile that CI tested
+#   - Ensures consistency between CI and production
+#
+# FLOW:
+#   1. GitHub Actions runs tests
+#   2. If tests pass → push to main
+#   3. Render detects push to main
+#   4. Render builds Docker image from Dockerfile
+#   5. Render deploys the container
 #
 # DOCUMENTATION:
-#   https://render.com/docs/blueprint-spec
+#   https://render.com/docs/docker
 # ==============================================================================
 
 services:
-  # Backend API Service
+  # Backend API Service (Docker-based)
   - type: web
     name: todo-backend
-    env: node
+    runtime: docker
     region: oregon              # Choose: oregon, frankfurt, singapore, ohio
     plan: free                  # Change to 'starter' for production
     
-    # Repository settings
-    branch: main                # Deploy from main branch only
-    
-    # Build settings
-    rootDir: backend            # Where the backend code lives
-    buildCommand: npm ci        # Install production dependencies only
-    startCommand: npm start     # Start the server (node server.js)
+    # Docker configuration
+    dockerfilePath: ./docker/Dockerfile.backend
+    dockerContext: .
     
     # Runtime settings
     healthCheckPath: /api/health
@@ -33,14 +36,12 @@ services:
     # Auto-deploy settings
     autoDeploy: true            # Deploy automatically when main branch updates
     
-    # Environment variables (add more in Render dashboard)
+    # Environment variables
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 5000           # Render will override this dynamically
       - key: MONGODB_URI
-        sync: false           # Must be set manually in Render dashboard (secret)
+        sync: false           # Set in Render dashboard (secret)
 
 # ==============================================================================
 # DEPLOYMENT PROCESS:

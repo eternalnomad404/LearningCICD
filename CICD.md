@@ -22,30 +22,47 @@
 
 ### What Is This?
 
-A **cleanly separated** CI/CD pipeline where:
+A **production-grade Docker-based** CI/CD pipeline where:
 - **GitHub Actions** runs tests (CI - Continuous Integration)
-- **Render** deploys the application (CD - Continuous Deployment)
-- **No overlap** - Each system has one responsibility
+- **GitHub Actions** builds Docker image (if tests pass)
+- **GitHub Actions** pushes to Docker Hub
+- **Render** uses the Docker image to deploy (CD - Continuous Deployment)
+- **Clean separation** - Each system has one responsibility
 
 ### Pipeline Flow
 
 ```
-┌──────────┐      ┌─────────────────┐      ┌──────────┐
-│Developer │─────→│ GitHub Actions  │─────→│  Render  │
-│  (You)   │ push │  (Run Tests)    │ pass │ (Deploy) │
-└──────────┘      └─────────────────┘      └──────────┘
-                         ↓                       ↓
-                    Tests Pass              App Live
-                    Tests Fail ❌         (Auto-deploy)
+┌──────────┐      ┌──────────────┐      ┌────────────┐      ┌──────────┐
+│Developer │─────→│GitHub Actions│─────→│ Docker Hub │─────→│  Render  │
+│  (You)   │ push │ (CI + Build) │ push │  (Storage) │ pull │ (Deploy) │
+└──────────┘      └──────────────┘      └────────────┘      └──────────┘
+                         ↓                     ↓                  ↓
+                    1. Tests               2. Store          3. Deploy
+                    2. Build Image         Image             Container
 ```
 
 ### Key Principles
 
-✅ **Separation of Concerns** - CI tests, CD deploys (never mixed)  
-✅ **Fail Fast** - Tests block bad code from reaching production  
-✅ **Deterministic** - Same input = same output (no surprises)  
+✅ **Separation of Concerns** - CI tests, builds image, CD deploys  
+✅ **Fail Fast** - Tests block bad code; no image built if tests fail  
+✅ **Deterministic** - Same Dockerfile = same image everywhere  
 ✅ **Observable** - Clear logs at every step  
-✅ **Safe** - Failed deployments don't cause downtime
+✅ **Safe** - Failed deployments don't cause downtime  
+✅ **Docker-based** - Container ensures consistency across environments
+
+---
+
+## Quick Start
+
+### For Docker Hub Integration (Recommended)
+
+**Full guide**: See [DOCKER_SETUP.md](DOCKER_SETUP.md)
+
+**Quick setup**:
+1. Create Docker Hub account
+2. Add `DOCKER_USERNAME` and `DOCKER_PASSWORD` to GitHub Secrets
+3. Push code → Tests run → Image builds → Pushed to Docker Hub
+4. Render pulls and deploys the image
 
 ---
 
