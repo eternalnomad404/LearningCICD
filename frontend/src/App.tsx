@@ -137,15 +137,22 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* CI/CD Deployment Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-center space-x-2 text-sm font-medium">
-            <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+      {/* CI/CD Deployment Banner - UPDATED! */}
+      <div className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 text-white animate-gradient">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-center space-x-3 text-sm font-semibold">
+            <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span className="tracking-wide">
+              ✨ LIVE CI/CD PIPELINE ✨ | GitHub Actions → Tests (18) → Docker Build → Push to Hub → Deploy!
+            </span>
+            <svg className="w-6 h-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>🚀 Deployed via CI/CD Pipeline | GitHub Actions → Docker Hub → Netlify</span>
-            <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+          </div>
+        </div>
+      </div>
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
           </div>
