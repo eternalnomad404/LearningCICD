@@ -1,40 +1,34 @@
 # ==============================================================================
-# RENDER.YAML - Render Platform Configuration (Docker-based)
+# RENDER.YAML - Render Platform Configuration (Docker Hub)
 # ==============================================================================
 # PURPOSE:
-#   - Render builds Docker image from your repository
-#   - Uses the same Dockerfile that CI tested
-#   - Ensures consistency between CI and production
+#   - Render pulls pre-built Docker image from Docker Hub
+#   - Faster deployments (no build time)
+#   - Uses tested image from CI/CD pipeline
 #
 # FLOW:
-#   1. GitHub Actions runs tests
-#   2. If tests pass → push to main
-#   3. Render detects push to main
-#   4. Render builds Docker image from Dockerfile
-#   5. Render deploys the container
+#   1. GitHub Actions builds and pushes to Docker Hub
+#   2. Render pulls the image from Docker Hub
+#   3. Render deploys the container
 #
 # DOCUMENTATION:
 #   https://render.com/docs/docker
 # ==============================================================================
 
 services:
-  # Backend API Service (Docker-based)
+  # Backend API Service (Docker Hub Image)
   - type: web
     name: todo-backend
-    runtime: docker
-    region: oregon              # Choose: oregon, frankfurt, singapore, ohio
+    runtime: image
     plan: free                  # Change to 'starter' for production
     
-    # Docker configuration
-    dockerfilePath: ./docker/Dockerfile.backend
-    dockerContext: .
+    # Pull from Docker Hub
+    image:
+      url: docker.io/eternalnomad404/todo-backend2:latest
     
     # Runtime settings
+    region: oregon              # Choose: oregon, frankfurt, singapore, ohio
     healthCheckPath: /api/health
-    numInstances: 1             # Increase for high availability
-    
-    # Auto-deploy settings
-    autoDeploy: true            # Deploy automatically when main branch updates
     
     # Environment variables
     envVars:
@@ -42,6 +36,8 @@ services:
         value: production
       - key: MONGODB_URI
         sync: false           # Set in Render dashboard (secret)
+      - key: PORT
+        sync: false           # Render sets this automatically
 
 # ==============================================================================
 # DEPLOYMENT PROCESS:
