@@ -169,10 +169,41 @@ const deleteTask = async (req, res) => {
   }
 };
 
+// @desc    Get task statistics
+// @route   GET /api/tasks/stats/summary
+// @access  Public
+const getTaskStats = async (req, res) => {
+  try {
+    const tasks = await Task.find();
+    
+    const stats = {
+      total: tasks.length,
+      completed: tasks.filter(task => task.completed).length,
+      pending: tasks.filter(task => !task.completed).length,
+      byPriority: {
+        low: tasks.filter(task => task.priority === 'low').length,
+        medium: tasks.filter(task => task.priority === 'medium').length,
+        high: tasks.filter(task => task.priority === 'high').length
+      }
+    };
+
+    res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Server Error: ' + error.message
+    });
+  }
+};
+
 module.exports = {
   getTasks,
   getTask,
   createTask,
   updateTask,
-  deleteTask
+  deleteTask,
+  getTaskStats
 };

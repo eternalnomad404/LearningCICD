@@ -5,8 +5,12 @@ const {
   getTask,
   createTask,
   updateTask,
-  deleteTask
+  deleteTask,
+  getTaskStats
 } = require('../controllers/taskController');
+
+// GET task statistics
+router.get('/stats/summary', getTaskStats);
 
 // GET all tasks and POST new task
 router
